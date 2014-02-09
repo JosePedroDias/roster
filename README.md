@@ -4,6 +4,15 @@
 This is the minimal roster implementation.  
 It is volatile and simple.
 
+The /ping calls create/update browser presence on the roster. A cookie sent by the server defines uniqueid.
+Optional meta argument can be set to define browser client's properties (ex: nickname, avatar, webrtc id, email...)
+
+The / call returns an array of known clients. Such calls don't update client status (so one can see the roster without taking part of it).
+
+The /leave call wipes browser from the roster.
+
+TODO:  
+could automatically delete clients idle for more than x seconds...
 
 
 ## server HTTP interface
@@ -43,6 +52,8 @@ defaults to 30 seconds (30000).
 
 `r.all(cb_fn)` - returns current roster state (array of browsers)
 
-`r.ping([meta_obj])` - updates browser state
+`r.ping([meta_obj])` - updates browser state. meta_obj is optional
 
 `r.leave()` - signs out browser
+
+`r.resume()` - signs in browser again
