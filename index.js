@@ -49,8 +49,7 @@ http.createServer(function(req, resp) {
 
 	/*console.log([
 		'pathname:', u.pathname, '\n',
-		'query:',    JSON.stringify(u.query), '\n\n',
-		//'cookie:',   req.headers.cookie, '\n\n'
+		'query:',    JSON.stringify(u.query), '\n\n'
 	].join(''));*/
 
 	var mimeType = 'application/json';
@@ -117,7 +116,6 @@ http.createServer(function(req, resp) {
 			content = 404;
 			code    = 404;
 	}
-	//console.log(req);
 
 	var headers = {
 		'Access-Control-Allow-Origin':      req.headers.origin,// || req.headers.referer,
