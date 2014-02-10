@@ -4,15 +4,24 @@
 This is the minimal roster implementation.  
 It is volatile and simple.
 
-The /ping calls create/update browser presence on the roster. A cookie sent by the server defines uniqueid.
+The `/ping` calls create/update browser presence on the roster. A cookie sent by the server defines uniqueid.
 Optional meta argument can be set to define browser client's properties (ex: nickname, avatar, webrtc id, email...)
 
-The / call returns an array of known clients. Such calls don't update client status (so one can see the roster without taking part of it).
+The `/` call returns an array of known clients. Such calls don't update client status (so one can see the roster without taking part of it).
 
-The /leave call wipes browser from the roster.
+The `/leave` call wipes browser from the roster.
 
-TODO:  
-could automatically delete clients idle for more than x seconds...
+The `/now` call returns the server timestamp, so you can correct different time zone timestamps.
+
+
+
+# compatibility
+
+Compatibility should be the same as [peerjs](http://peerjs.com/) (beta chrome and firefox releases).
+
+Additionally firefox now requires one to visit a domain so its cookies get stored (bummer).
+If your firefox client is constantly creating new connections you must visit the domain of the roster first (once per session, FML?!).
+
 
 
 ## server HTTP interface
@@ -25,7 +34,7 @@ The server supports the following:
 
 `/now` - returns the roster server's current timestamp
 
-`/leave` - signs out of the roster. returns wether it was successful or not
+`/leave` - signs out of the roster. returns whether it was successful or not
 
 `/client.js` - serves a JS client interface for using the roster via XHR CORS requests
 
@@ -86,3 +95,8 @@ defaults to 30 seconds (30000).
 `r.others()` - returns array of others' names
 
 `r.get(name_str)` - get roster data for the given name
+
+You get access to the metadata sent by the original client exposed in the meta attribute.
+
+You can also make use of the attribute lmeta to store additional knowledge about the clients (such as webrtc connections and such).  
+On roster updates lmeta stays untouched (unlike most of the client data).

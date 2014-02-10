@@ -11,8 +11,8 @@ var ON_ENTER = function(req, o) {
     o.userAgent = req.headers['user-agent'];
 };
 
-var MAX_IDLE_TIME   = 5 * 60 * 1000; // 5 min
-var CHECK_IDLE_TIME =     60 * 1000; // 1 min
+var MAX_IDLE_TIME   = 10 * 1000; // 10s
+var CHECK_IDLE_TIME =  6 * 1000; //  6s
 var NEXT_IDLE_CHECK;
 
 
@@ -92,7 +92,7 @@ http.createServer(function(req, resp) {
             if (client.lastSeen < t - MAX_IDLE_TIME) {
                 --f;
                 roster.splice(i, 1);
-                console.log('LEAVE %s', client.uid);
+                console.log('LEAVE %s %s', client.uid, client.meta ? JSON.stringify(client.meta) : '');
             }
         }
     }
@@ -129,7 +129,7 @@ http.createServer(function(req, resp) {
                 ON_ENTER(req, client);
                 roster.push(client);
                 idx = roster.length - 1;
-                console.log('ENTER %s', client.uid);
+                console.log('ENTER %s %s\n%s', client.uid, client.meta ? JSON.stringify(client.meta) : '', client.userAgent);
             }
             content = clone(roster);
             content.splice(idx, 1);
@@ -151,7 +151,7 @@ http.createServer(function(req, resp) {
                 content = {
                     messsage: 'client left'
                 };
-                console.log('LEAVE %s', client.uid);
+                console.log('LEAVE %s', client.uid, client.meta ? JSON.stringify(client.meta) : '');
             }
             break;
 

@@ -17,14 +17,6 @@
     };
 
 
-    var extend = function(to, from) {
-        for (var k in from) {
-            to[k] = from[k];
-        }
-        return to;
-    };
-
-
 
     window.roster = function(o) {
         var api = {};
@@ -45,7 +37,11 @@
 
         api.ping = function(meta) {
             var u = uri + '/ping';
+            if (this._meta) {
+                meta = this._meta;
+            }
             if (meta) {
+                this._meta = meta;
                 u = [u, '?meta=', encodeURIComponent( JSON.stringify(meta) )].join('');
             }
             ajax(u, api._process);
@@ -83,16 +79,12 @@
                 others[name] = o;
                 O = api._others[name];
                 if (O) {
-                    //console.log('old meta:', O.meta);
-                    //console.log('new meta:', o.meta);
-                    var oldMetaStr = CircularJSON.stringify(O.meta);
+                    o.lmeta = O.lmeta;
+                    var oldMetaStr = JSON.stringify(O.meta);
                     if (!O.meta) { O.meta = {}; oldMetaStr = '{}'; }
                     if (!o.meta) { o.meta = {}; }
 
-                    o.meta = extend(O.meta, o.meta);
-                    //console.log('NEW meta:', o.meta, '\n');
-
-                    if (CircularJSON.stringify(o.meta) !== oldMetaStr) {
+                    if (JSON.stringify(o.meta) !== oldMetaStr) {
                         if (onChange) {
                             onChange(o);
                         }
@@ -100,6 +92,7 @@
                     delete api._others[name];
                 }
                 else {
+                    o.lmeta = {};
                     if (onEnter) {
                         onEnter(o);
                     }
@@ -115,11 +108,11 @@
 
         api.others = function() {
             return Object.keys(this._others);
-        },
+        };
 
         api.get = function(name) {
             return this._others[name];
-        },
+        };
 
         api.resume(o.meta);
 

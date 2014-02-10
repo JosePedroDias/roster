@@ -6,8 +6,8 @@
         <title>roster + peerjs demo</title>
 
         <script type="text/javascript" src="http://127.0.0.1:4444/client.js"></script>
-        <script src="http://cdn.peerjs.com/0.3/peer.js"></script>
-        <script type="text/javascript" src="https://rawgithub.com/WebReflection/circular-json/master/build/circular-json.js"></script>
+        <!-- <script src="http://cdn.peerjs.com/0.3/peer.js"></script> -->
+        <script src="http://cdn.peerjs.com/0.3.7/peer.js"></script>
 
         <style type="text/css">
             body {
@@ -61,7 +61,7 @@
                     optionEl = document.createElement('option');
                     optionEl.setAttribute('value', other);
                     optionEl.appendChild( document.createTextNode(other) );
-                    if (val && ((other === val) || (f === 1)) ) {
+                    if ( (val && (other === val) ) || (f === 1) ) {
                         optionEl.setAttribute('selected', '');
                     }
                     destinationEl.appendChild(optionEl);
@@ -90,7 +90,11 @@
             var pidToName = {};
 
             peer.on('connection', function(conn) {
+                console.log('incoming remote peerjs id %s', conn.peer);
+
                 var name = pidToName[conn.peer];
+
+                //console.log(conn);
 
                 if (!name) {
                     var o, found = false;
@@ -98,7 +102,7 @@
                         o = r._others[name];
                         if (o.meta.pid === conn.peer) {
                             pidToName[conn.peer] = name;
-                            //o.meta.conn = conn;
+                            //o.lmeta.conn = conn;
                             found = true;
                             break;
                         }
@@ -118,6 +122,8 @@
             });
 
             peer.on('open', function(id) {
+                console.log('my peerjs id is %s', id);
+
                 var getName = function(o) {
                     return (o.meta && o.meta.name) ? o.meta.name : o.uid;
                 };
@@ -147,17 +153,18 @@
                         return log('unknown user: ' + name + '!');
                     }
 
-                    if (o.meta.conn) {
+                    if (o.lmeta.conn) {
                         log(myName + ' -> ' + name + ' : ' + msg);
-                        return o.meta.conn.send(msg);
+                        return o.lmeta.conn.send(msg);
                     }
 
                     log('requesting p2p connection to ' + name + '...');
+                    console.log('using remote peerjs id %s', o.meta.pid);
                     var conn = peer.connect(o.meta.pid);
                     conn.on('open', function() {
                         pidToName[conn.peer] = name;
                         log('connection to ' + name + ' established.');
-                        o.meta.conn = conn;
+                        o.lmeta.conn = conn;
                         r.say(name, msg);
                     });
                 };
