@@ -11,10 +11,8 @@ var ON_ENTER = function(req, o) {
     o.userAgent = req.headers['user-agent'];
 };
 
-/*var ON_UPDATE = function(req, o) {
-};*/
-
-var MAX_IDLE_TIME = 5 * 60 * 1000;
+var MAX_IDLE_TIME   = 5 * 60 * 1000; // 5 min
+var CHECK_IDLE_TIME =     60 * 1000; // 1 min
 var NEXT_IDLE_CHECK;
 
 
@@ -32,7 +30,6 @@ var now = function() {
 };
 
 var rnd = function() {
-    //return Math.floor( Math.random() * 1000000 ) + '';
     return ( Math.floor( Math.random() * Math.pow(36, 12) ) ).toString(36); // 12 random [0-9a-z] characters
 };
 
@@ -69,6 +66,10 @@ var getSingleCookie = function(cookie, name) {
 
 
 
+NEXT_IDLE_CHECK = now() - 1;
+
+
+
 http.createServer(function(req, resp) {
     var u = url.parse(req.url, true);
 
@@ -80,7 +81,22 @@ http.createServer(function(req, resp) {
     var mimeType = 'application/json';
     var code = 200;
     var content = '';
-    var cookie, client, meta, idx;
+    var cookie, client, meta, idx, t;
+
+    t = now();
+
+    if (t > NEXT_IDLE_CHECK) {
+        NEXT_IDLE_CHECK = t + CHECK_IDLE_TIME;
+        for (var i = 0, f = roster.length; i < f; ++i) {
+            client = roster[i];
+            if (client.lastSeen < t - MAX_IDLE_TIME) {
+                --f;
+                roster.splice(i, 1);
+                console.log('LEAVE %s', client.uid);
+            }
+        }
+    }
+
     switch (u.pathname) {
         case '/':
             content = roster;
@@ -97,7 +113,7 @@ http.createServer(function(req, resp) {
             idx = findInArrIdx(roster, 'uid', cookie);
             if (cookie && idx !== -1) {
                 client = roster[idx];
-                client.lastSeen = now();
+                client.lastSeen = t;
                 if (meta !== undefined) {
                     client.meta = meta;
                 }
@@ -107,19 +123,20 @@ http.createServer(function(req, resp) {
                 cookie = rnd();
                 client = {
                     uid:       cookie,
-                    lastSeen:  now(),
+                    lastSeen:  t,
                     meta:      meta
                 };
                 ON_ENTER(req, client);
                 roster.push(client);
-                idx = roster.length - 1
+                idx = roster.length - 1;
+                console.log('ENTER %s', client.uid);
             }
-            content = clone(roster)
+            content = clone(roster);
             content.splice(idx, 1);
             break;
 
         case '/now':
-            content = now();
+            content = t;
             break;
 
         case '/leave':
@@ -134,6 +151,7 @@ http.createServer(function(req, resp) {
                 content = {
                     messsage: 'client left'
                 };
+                console.log('LEAVE %s', client.uid);
             }
             break;
 
