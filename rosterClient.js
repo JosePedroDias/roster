@@ -17,6 +17,14 @@
     };
 
 
+    var extend = function(to, from) {
+        for (var k in from) {
+            to[k] = from[k];
+        }
+        return to;
+    };
+
+
 
     window.roster = function(o) {
         var api = {};
@@ -75,10 +83,16 @@
                 others[name] = o;
                 O = api._others[name];
                 if (O) {
-                    if (!o.meta && !O.meta) {}
-                    else if ( (!o.meta && O.meta) ||
-                              (!O.meta && o.meta) ||
-                              (o.meta.toString() !== O.meta.toString()) ) {
+                    //console.log('old meta:', O.meta);
+                    //console.log('new meta:', o.meta);
+                    var oldMetaStr = CircularJSON.stringify(O.meta);
+                    if (!O.meta) { O.meta = {}; oldMetaStr = '{}'; }
+                    if (!o.meta) { o.meta = {}; }
+
+                    o.meta = extend(O.meta, o.meta);
+                    //console.log('NEW meta:', o.meta, '\n');
+
+                    if (CircularJSON.stringify(o.meta) !== oldMetaStr) {
                         if (onChange) {
                             onChange(o);
                         }

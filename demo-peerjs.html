@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+
+        <title>roster + peerjs demo</title>
+
+        <script type="text/javascript" src="http://127.0.0.1:4444/client.js"></script>
+        <script src="http://cdn.peerjs.com/0.3/peer.js"></script>
+        <script type="text/javascript" src="https://rawgithub.com/WebReflection/circular-json/master/build/circular-json.js"></script>
+
+        <style type="text/css">
+            body {
+                font-family: sans-serif;
+            }
+
+            #output {
+
+            }
+
+            #output p {
+                margin: 0;
+            }
+
+            #input {
+
+            }
+
+            #destination {
+                width: 10em;
+            }
+        </style>
+    </head>
+
+    <body>
+        <h1>roster + peerjs demo</h1>
+
+        <div id="output">
+        </div>
+
+        <select id="destination"></select>
+        <input id="input">
+
+        <script type="text/javascript">
+            var inputEl       = document.getElementById('input');
+            var outputEl      = document.getElementById('output');
+            var destinationEl = document.getElementById('destination');
+
+            var log = function(msg) {
+                var pEl = document.createElement('p');
+                pEl.appendChild( document.createTextNode(msg) );
+                outputEl.appendChild(pEl);
+            };
+
+            var updateDestination = function() {
+                var val = destinationEl.value;
+                destinationEl.innerHTML = '';
+                var optionEl, other, others = r.others();
+                for (var i = 0, f = others.length; i < f; ++i) {
+                    other = others[i];
+                    optionEl = document.createElement('option');
+                    optionEl.setAttribute('value', other);
+                    optionEl.appendChild( document.createTextNode(other) );
+                    if (val && ((other === val) || (f === 1)) ) {
+                        optionEl.setAttribute('selected', '');
+                    }
+                    destinationEl.appendChild(optionEl);
+                }
+            };
+
+            inputEl.addEventListener('keyup', function(ev) {
+                if (ev.keyCode === 13) {
+                    var msg = inputEl.value;
+                    inputEl.value = '';
+                    r.say( destinationEl.value, msg );
+                    inputEl.focus();
+                }
+            });
+
+            var myName = localStorage.getItem('name');
+            do {
+                myName = prompt('Name?', myName);
+            } while (!myName);
+            localStorage.setItem('name', myName);
+
+            inputEl.focus();
+
+            var peer = new Peer({key:'i5sd6pb4xfnd0a4i'}); // TODO HEY THIS IS MY PRIVATE KEY, REQUEST ONE AND USE IT INSTEAD!
+
+            var pidToName = {};
+
+            peer.on('connection', function(conn) {
+                var name = pidToName[conn.peer];
+
+                if (!name) {
+                    var o, found = false;
+                    for (name in r._others) {
+                        o = r._others[name];
+                        if (o.meta.pid === conn.peer) {
+                            pidToName[conn.peer] = name;
+                            //o.meta.conn = conn;
+                            found = true;
+                            break;
+                        }
+                    }
+
+                    if (!found) {
+                        return log('received unknown connection?!');
+                    }
+
+                    log('established incoming p2p connection from ' + name);
+                }
+
+                //console.log('received conn', conn);
+                conn.on('data', function(msg) {
+                    log(myName + ' <- ' + name + ' : ' + msg);
+                });
+            });
+
+            peer.on('open', function(id) {
+                var getName = function(o) {
+                    return (o.meta && o.meta.name) ? o.meta.name : o.uid;
+                };
+                window.r = roster({
+                    domain:   '127.0.0.1',
+                    port:     4444,
+                    interval: 5000,
+                    meta: {pid:id, name:myName},
+                    onEnter: function(o) {
+                        log('enter ' + getName(o));
+                        updateDestination();
+                    },
+                    onChange: function(o) {
+                        log('change ' + getName(o));
+                        updateDestination();
+                    },
+                    onLeave: function(o) {
+                        log('leave ' + getName(o));
+                        updateDestination();
+                    }
+                });
+
+                r.say = function(name, msg) {
+                    var o = r.get(name);
+
+                    if (!name) {
+                        return log('unknown user: ' + name + '!');
+                    }
+
+                    if (o.meta.conn) {
+                        log(myName + ' -> ' + name + ' : ' + msg);
+                        return o.meta.conn.send(msg);
+                    }
+
+                    log('requesting p2p connection to ' + name + '...');
+                    var conn = peer.connect(o.meta.pid);
+                    conn.on('open', function() {
+                        pidToName[conn.peer] = name;
+                        log('connection to ' + name + ' established.');
+                        o.meta.conn = conn;
+                        r.say(name, msg);
+                    });
+                };
+            });
+        </script>
+    </body>
+</html>
