@@ -36,14 +36,39 @@ The server supports the following:
 example:
 
 ```javascript
-var r = roster({domain:'127.0.0.1', port:4444, interval:10000});
+var r = roster({
+    domain:   '127.0.0.1',
+    port:     4444,
+    interval: 10000,
+    onEnter: function(o) {
+        console.log('enter', o);
+    },
+    onChange: function(o) {
+        console.log('change', o);
+    },
+    onLeave: function(o) {
+        console.log('leave', o);
+    }
+});
 
 r.ping({name:'Johnny'});
 
 r.all(function(err, data) {
-	if (err) { return alert(err); }
-	console.log(data);
+    if (err) { return alert(err); }
+    console.log(data);
 });
+
+r.others();
+// ["Anne", "Greg"];
+
+r.get('Greg')
+/*
+{   "uid": "cz886ntn21c8",
+    "lastSeen": 1391995733799,
+    "meta": {"name": "Greg"},
+    "ip": "127.0.0.1",
+    "userAgent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:26.0) Gecko/20100101 Firefox/26.0"   }
+*/
 ```
 
 notice the interval parameter.
@@ -57,3 +82,7 @@ defaults to 30 seconds (30000).
 `r.leave()` - signs out browser
 
 `r.resume()` - signs in browser again
+
+`r.others()` - returns array of others' names
+
+`r.get(name_str)` - get roster data for the given name

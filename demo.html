@@ -1,75 +1,84 @@
 <!DOCTYPE html>
 <html>
-	<head>
-		<meta charset="utf-8">
+    <head>
+        <meta charset="utf-8">
 
-		<title>roster demo</title>
+        <title>roster demo</title>
 
-		<script type="text/javascript" src="http://127.0.0.1:4444/client.js"></script>
+        <script type="text/javascript" src="http://127.0.0.1:4444/client.js"></script>
 
-		<style type="text/css">
-			body {
-				font-family: sans-serif;
-			}
-		</style>
-	</head>
+        <style type="text/css">
+            body {
+                font-family: sans-serif;
+            }
+        </style>
+    </head>
 
-	<body>
-		<h1>roster demo</h1>
+    <body>
+        <h1>roster demo</h1>
 
-		<button id="bAll">all</button>
-		<br/>
+        <button id="bAll">all</button>
+        <br/>
 
-		<button id="bPing">ping</button><br/>
+        <button id="bPing">ping</button><br/>
 
-		meta (JSON): <input id="iMeta">
-		<br/>
+        meta (JSON): <input id="iMeta">
+        <br/>
 
-		<button id="bLeave">leave</button><br/>
+        <button id="bLeave">leave</button><br/>
 
-		<button id="bResume">resume</button>
+        <button id="bResume">resume</button>
 
-		<script type="text/javascript">
-			var bAllEl    = document.getElementById('bAll');
-			var iMetaEl   = document.getElementById('iMeta');
-			var bPingEl   = document.getElementById('bPing');
-			var bLeaveEl  = document.getElementById('bLeave');
-			var bResumeEl = document.getElementById('bResume');
+        <script type="text/javascript">
+            var bAllEl    = document.getElementById('bAll');
+            var iMetaEl   = document.getElementById('iMeta');
+            var bPingEl   = document.getElementById('bPing');
+            var bLeaveEl  = document.getElementById('bLeave');
+            var bResumeEl = document.getElementById('bResume');
 
-			var r = roster({
-				domain:   '127.0.0.1',
-				port:     4444,
-				interval: 5000
-			});
+            var r = roster({
+                domain:   '127.0.0.1',
+                port:     4444,
+                interval: 5000,
+                onEnter: function(o) {
+                    console.log('enter', o);
+                },
+                onChange: function(o) {
+                    console.log('change', o);
+                },
+                onLeave: function(o) {
+                    console.log('leave', o);
+                }
+            });
 
-			var fetchMeta = function() {
-				var meta = iMetaEl.value;
-				if (meta) {
-					try {
-						meta = JSON.parse(meta);
-					} catch (ex) {}
-				}
-				return meta;
-			};
+            var fetchMeta = function() {
+                var meta = iMetaEl.value;
+                if (meta) {
+                    try {
+                        meta = JSON.parse(meta);
+                    } catch (ex) {}
+                }
+                return meta;
+            };
 
-			bAllEl.addEventListener('click', function() {
-				r.all(function(err, data) {
-					if (err) { return alert(err); }
-					console.log(data);
-				});
-			});
+            bAllEl.addEventListener('click', function() {
+                r.all(function(err, data) {
+                    if (err) { return alert(err); }
+                    console.log(data);
+                });
+            });
 
-			bPingEl.addEventListener('click', function() {
-				r.ping( fetchMeta() );
-			});
+            bPingEl.addEventListener('click', function() {
+                r.ping( fetchMeta() );
+            });
 
-			bLeaveEl.addEventListener('click', function() {
-				r.leave();
-			});
-			
-			bResumeEl.addEventListener('click', function() {
-				r.resume( fetchMeta() );
-			});
-		</script>
-	</body>
+            bLeaveEl.addEventListener('click', function() {
+                r.leave();
+            });
+            
+            bResumeEl.addEventListener('click', function() {
+                r.resume( fetchMeta() );
+            });
+        </script>
+    </body>
 </html>
