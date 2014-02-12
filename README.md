@@ -22,6 +22,8 @@ Compatibility should be the same as [peerjs](http://peerjs.com/) (beta chrome an
 Additionally firefox now requires one to visit a domain so its cookies get stored (bummer).
 If your firefox client is constantly creating new connections you must visit the domain of the roster first (once per session, FML?!).
 
+Working fine in Chrome 33 with Firefox 26.
+
 
 
 ## server HTTP interface

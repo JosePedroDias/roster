@@ -23,11 +23,27 @@
             }
 
             #input {
-
+                position: absolute;
+                left: 10em;
+                right: 0;
             }
 
             #destination {
                 width: 10em;
+            }
+
+            #roster {
+                position: fixed;
+                right: 20px;
+                top: 0;
+            }
+
+            #roster ul {
+                margin: 0;
+            }
+
+            #roster li {
+                list-style-type: none;
             }
         </style>
     </head>
@@ -38,6 +54,9 @@
         <div id="output">
         </div>
 
+        <ul id="roster">
+        </ul>
+
         <select id="destination"></select>
         <input id="input">
 
@@ -45,6 +64,7 @@
             var inputEl       = document.getElementById('input');
             var outputEl      = document.getElementById('output');
             var destinationEl = document.getElementById('destination');
+            var rosterEl      = document.getElementById('roster');
 
             var log = function(msg) {
                 var pEl = document.createElement('p');
@@ -53,19 +73,24 @@
             };
 
             var updateDestination = function() {
-                var val = destinationEl.value;
-                destinationEl.innerHTML = '';
-                var optionEl, other, others = r.others();
-                for (var i = 0, f = others.length; i < f; ++i) {
-                    other = others[i];
-                    optionEl = document.createElement('option');
-                    optionEl.setAttribute('value', other);
-                    optionEl.appendChild( document.createTextNode(other) );
-                    if ( (val && (other === val) ) || (f === 1) ) {
-                        optionEl.setAttribute('selected', '');
+                setTimeout(function() {
+                    var val = destinationEl.value;
+                    destinationEl.innerHTML = '';
+                    var optionEl, other, others = r.others();
+
+                    rosterEl.innerHTML = (others.length === 0) ? '' : ['<li>', others.join('</li><li>'), '</li>'].join('');
+
+                    for (var i = 0, f = others.length; i < f; ++i) {
+                        other = others[i];
+                        optionEl = document.createElement('option');
+                        optionEl.setAttribute('value', other);
+                        optionEl.appendChild( document.createTextNode(other) );
+                        if ( (val && (other === val) ) || (f === 1) ) {
+                            optionEl.setAttribute('selected', '');
+                        }
+                        destinationEl.appendChild(optionEl);
                     }
-                    destinationEl.appendChild(optionEl);
-                }
+                }, 500);
             };
 
             inputEl.addEventListener('keyup', function(ev) {
