@@ -102,3 +102,11 @@ You get access to the metadata sent by the original client exposed in the meta a
 
 You can also make use of the attribute lmeta to store additional knowledge about the clients (such as webrtc connections and such).  
 On roster updates lmeta stays untouched (unlike most of the client data).
+
+
+
+## bridge for peerjs
+
+Working browsers:
+
+    Chrome 33 <--> Firefox 27

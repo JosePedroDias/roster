@@ -110,7 +110,15 @@
 
             inputEl.focus();
 
-            var peer = new Peer({key:'i5sd6pb4xfnd0a4i'}); // TODO HEY THIS IS MY PRIVATE KEY, REQUEST ONE AND USE IT INSTEAD!
+            var peer;
+            if (location.search === '?self') {
+                console.log('using self hosted peerjs server');
+                peer = new Peer({host:'127.0.0.1', port:9000}); // SELF HOSTED
+            }
+            else {
+                console.log('using peerjs infrastructure');
+                peer = new Peer({key:'i5sd6pb4xfnd0a4i'}); // TODO HEY THIS IS MY PRIVATE KEY, REQUEST ONE AND USE IT INSTEAD!
+            }
 
             var pidToName = {};
 
